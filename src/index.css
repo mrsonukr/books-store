@@ -1,0 +1,57 @@
+:root {
+  --color-50: #eef2ff;
+  --color-100: #e0e7ff;
+  --color-200: #c7d2fe;
+  --color-300: #a5b4fc;
+  --color-400: #818cf8;
+  --color-500: #6366f1;
+  --color-600: #4f46e5;
+  --color-700: #4338ca;
+  --color-800: #3730a3;
+  --color-900: #312e81;
+  --color-950: #1e1b4b;
+  /* --lime-50: #f7fee7;
+  --lime-100: #ecfccb;
+  --lime-200: #d9f99d;
+  --lime-300: #bef264;
+  --lime-400: #a3e635;
+  --lime-500: #84cc16;
+  --lime-600: #65a30d;
+  --lime-700: #4d7c0f;
+  --lime-800: #3f6212;
+  --lime-900: #365314;
+  --lime-950: #1a2e05; */
+  --lime-50: #fafafa;
+  --lime-100: #f4f4f5;
+  --lime-200: #e4e4e7;
+  --lime-300: #d4d4d8;
+  --lime-400: #a1a1aa;
+  --lime-500: #71717a;
+  --lime-600: #52525b;
+  --lime-700: #3f3f46;
+  --lime-800: #27272a;
+  --lime-900: #18181b;
+  --lime-950: #09090b;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.padding {
+  @apply py-4 px-[5%]
+}
+
+.margin {
+  margin-top: 155px;
+}

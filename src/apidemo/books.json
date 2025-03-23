@@ -1,0 +1,133 @@
+{
+  "categories": [
+    {
+      "category_name": "Best Seller",
+      "slug": "bestseller",
+      "books": [
+        {
+          "id": 1,
+          "name": "The Great Adventure",
+          "author": "John Doe",
+          "price": "₹19.99",
+          "rating": 4,
+          "summary": "An exciting journey through uncharted lands and thrilling escapades.",
+          "image": "/assets/images/book1.png"
+        },
+        {
+          "id": 2,
+          "name": "Mystery of the Lost Island",
+          "author": "Jane Smith",
+          "price": "₹14.99",
+          "rating": 3,
+          "summary": "A gripping mystery novel that keeps you guessing till the end.",
+          "image": "/assets/images/book2.png"
+        },
+        {
+          "id": 3,
+          "name": "Learning React",
+          "author": "Alex Johnson",
+          "price": "₹29.99",
+          "rating": 5,
+          "summary": "A comprehensive guide to mastering React.js and modern web development.",
+          "image": "/assets/images/book3.png"
+        },
+        {
+          "id": 4,
+          "name": "Cooking Made Easy",
+          "author": "Emily Clark",
+          "price": "₹9.99",
+          "rating": 4,
+          "summary": "Simple and delicious recipes for everyday cooking.",
+          "image": "/assets/images/book4.png"
+        },
+        {
+          "id": 1,
+          "name": "The Great Adventure",
+          "author": "John Doe",
+          "price": "₹19.99",
+          "rating": 4,
+          "summary": "An exciting journey through uncharted lands and thrilling escapades.",
+          "image": "/assets/images/book1.png"
+        },
+        {
+          "id": 2,
+          "name": "Mystery of the Lost Island",
+          "author": "Jane Smith",
+          "price": "₹14.99",
+          "rating": 3,
+          "summary": "A gripping mystery novel that keeps you guessing till the end.",
+          "image": "/assets/images/book2.png"
+        },
+        {
+          "id": 3,
+          "name": "Learning React",
+          "author": "Alex Johnson",
+          "price": "₹29.99",
+          "rating": 5,
+          "summary": "A comprehensive guide to mastering React.js and modern web development.",
+          "image": "/assets/images/book3.png"
+        },
+        {
+          "id": 4,
+          "name": "Cooking Made Easy",
+          "author": "Emily Clark",
+          "price": "₹9.99",
+          "rating": 4,
+          "summary": "Simple and delicious recipes for everyday cooking.",
+          "image": "/assets/images/book4.png"
+        }
+      ]
+    },
+    {
+      "category_name": "Our Suggested",
+      "slug": "suggestions",
+      "books": [
+        {
+          "id": 1,
+          "name": "The Great Adventure",
+          "author": "John Doe",
+          "price": "₹19.99",
+          "rating": 4,
+          "summary": "An exciting journey through uncharted lands and thrilling escapades.",
+          "image": "/assets/images/book1.png"
+        },
+        {
+          "id": 2,
+          "name": "Mystery of the Lost Island",
+          "author": "Jane Smith",
+          "price": "₹14.99",
+          "rating": 3,
+          "summary": "A gripping mystery novel that keeps you guessing till the end.",
+          "image": "/assets/images/book4.png"
+        },
+        {
+          "id": 3,
+          "name": "Learning React",
+          "author": "Alex Johnson",
+          "price": "₹29.99",
+          "rating": 5,
+          "summary": "A comprehensive guide to mastering React.js and modern web development.",
+          "image": "/assets/images/book5.png"
+        },
+        {
+          "id": 4,
+          "name": "Cooking Made Easy",
+          "author": "Emily Clark",
+          "price": "₹9.99",
+          "rating": 4,
+          "summary": "Simple and delicious recipes for everyday cooking.",
+          "image": "/assets/images/book6.png"
+        },
+        {
+          "id": 2,
+          "name": "Mystery of the Lost Island",
+          "author": "Jane Smith",
+          "price": "₹14.99",
+          "rating": 3,
+          "summary": "A gripping mystery novel that keeps you guessing till the end.",
+          "image": "/assets/images/book4.png"
+        }
+      ]
+    }
+  ]
+}

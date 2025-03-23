@@ -1,0 +1,54 @@
+.upbook-form {
+    margin: 0 auto;
+    border-radius: 8px;
+    font-size: .8rem;
+
+}
+
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: var(--lime-50);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: 1.5px solid var(--lime-200);
+    border-color: var(--lime-200);
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.upload-button {
+    background-color: var(--color-500);
+    transition: .2s;
+    width: 100%;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--color-600);
+    }
+}
