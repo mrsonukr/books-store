@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import "./css/UploadBook.css";
 import { Button } from "@radix-ui/themes";
 import { Upload } from "lucide-react";
+import axios from "axios";
 import Notification from "../components/Notifiaction/Notification"; // Import the Notification component
+
 
 const UploadBook = () => {
   const [formData, setFormData] = useState({
@@ -56,48 +58,41 @@ const UploadBook = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Simulate book upload by creating a new book object
-    const newBook = {
-      book_id: Date.now(), // Unique ID based on timestamp
-      book_name: formData.title,
-      book_image: formData.imageurl || "/assets/images/default-book.png", // Fallback image
-      price: parseFloat(formData.price) || 0.0,
-      author_name: formData.author,
-      rating: null,
-      summary: formData.description,
-      category: formData.category,
-      pdf_link: formData.pdfurl || null,
-    };
-
-    // Update localStorage directly
-    const storedBooks = JSON.parse(localStorage.getItem("uploadedBooks")) || [];
-    const updatedBooks = [...storedBooks, newBook];
-    localStorage.setItem("uploadedBooks", JSON.stringify(updatedBooks));
-
-    // Show success notification
-    addNotification("success", "Book uploaded successfully!");
-    console.log("Book uploaded successfully:", newBook);
-
-    // Reset form
-    setFormData({
-      title: "",
-      author: "",
-      imageurl: "",
-      category: "",
-      description: "",
-      pdfurl: "",
-      price: "",
-    });
+    try {
+      const response = await axios.post("http://localhost:5000/api/books", {
+        book_name: formData.title,
+        book_image: formData.imageurl,
+        price: parseFloat(formData.price) || 0.00,
+        author_name: formData.author,
+        rating: null,
+        summary: formData.description,
+        category: formData.category,
+        pdf_link: formData.pdfurl,
+      });
+      console.log("Book uploaded successfully:", response.data);
+      addNotification("success", "Book uploaded successfully!");
+      setFormData({
+        title: "",
+        author: "",
+        imageurl: "",
+        category: "",
+        description: "",
+        pdfurl: "",
+        price: "",
+      });
+    } catch (error) {
+      console.error("Error uploading book:", error);
+      addNotification("error", "Failed to upload book. Please try again.");
+    }
   };
 
   return (
     <div className="p-6">
       <form className="upbook-form" onSubmit={handleSubmit}>
         <h1 className="text-2xl font-semibold mb-4">Upload New Books</h1>
-
+        
         {/* Title and Author */}
         <div className="form-row">
           <div className="form-group">

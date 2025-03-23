@@ -2,26 +2,52 @@ import React, { useState, useEffect, useRef } from "react";
 import "./css/UploadBook.css"; // Reusing the same CSS file
 import { Button } from "@radix-ui/themes";
 import { Upload } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 import Notification from "../components/Notifiaction/Notification"; // Import the Notification component
 
 const EditBook = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
-  // Hardcoded single book data from SQL dump
-  const initialBookData = {
-    book_id: 2,
-    title: "Mystery of the Lost Island",
-    author: "Jane Smith",
-    imageurl: "/assets/images/book2.png",
-    category: "Mystery",
-    description: "A gripping mystery novel that keeps you guessing till the end.",
+  const [formData, setFormData] = useState({
+    title: "",
+    author: "",
+    imageurl: "",
+    category: "",
+    description: "",
     pdfurl: "",
-    price: "14.99",
-  };
-
-  const [formData, setFormData] = useState(initialBookData);
+    price: ""
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const timeoutRefs = useRef([]);
+
+  // Fetch book data when component mounts
+  useEffect(() => {
+    const fetchBook = async () => {
+      try {
+        const response = await axios.get(`http://localhost:5000/api/books/${id}`);
+        const book = response.data.data;
+        setFormData({
+          title: book.book_name,
+          author: book.author_name,
+          imageurl: book.book_image || "",
+          category: book.category,
+          description: book.summary || "",
+          pdfurl: book.pdf_link || "",
+          price: book.price.toString()
+        });
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch book details");
+        setLoading(false);
+        addNotification("error", "Failed to fetch book details");
+        console.error("Error fetching book:", err);
+      }
+    };
+    fetchBook();
+  }, [id]);
 
   // Notification timeout management
   useEffect(() => {
@@ -64,44 +90,35 @@ const EditBook = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Simulate updating the book
-    const updatedBook = {
-      book_id: initialBookData.book_id, // Keep the same ID
-      book_name: formData.title,
-      book_image: formData.imageurl || "/assets/images/default-book.png",
-      price: parseFloat(formData.price) || 0.0,
-      author_name: formData.author,
-      rating: null,
-      summary: formData.description,
-      category: formData.category,
-      pdf_link: formData.pdfurl || null,
-    };
-
-    // Optionally update localStorage (simulating persistence)
-    const storedBooks = JSON.parse(localStorage.getItem("uploadedBooks")) || [];
-    const updatedBooks = storedBooks.map((book) =>
-      book.book_id === updatedBook.book_id ? updatedBook : book
-    );
-    // If the book isn't in localStorage yet, add it
-    if (!storedBooks.some((book) => book.book_id === updatedBook.book_id)) {
-      updatedBooks.push(updatedBook);
+    try {
+      await axios.put(`http://localhost:5000/api/books/${id}`, {
+        book_name: formData.title,
+        book_image: formData.imageurl,
+        price: parseFloat(formData.price),
+        author_name: formData.author,
+        rating: null,
+        summary: formData.description,
+        category: formData.category,
+        pdf_link: formData.pdfurl,
+      });
+      addNotification("success", "Book updated successfully!");
+      setTimeout(() => navigate("/admin/managebook"), 1000); // Delay redirect to show notification
+    } catch (err) {
+      console.error("Error updating book:", err);
+      addNotification("error", "Failed to update book. Please try again.");
     }
-    localStorage.setItem("uploadedBooks", JSON.stringify(updatedBooks));
-
-    // Show success notification and redirect
-    addNotification("success", "Book updated successfully!");
-    console.log("Book updated successfully:", updatedBook);
-    setTimeout(() => navigate("/admin/managebook"), 1000); // Delay redirect to show notification
   };
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <div className="p-6">
       <form className="upbook-form" onSubmit={handleSubmit}>
         <h1 className="text-2xl font-semibold mb-4">Edit Book Details</h1>
-
+        
         {/* Title and Author */}
         <div className="form-row">
           <div className="form-group">

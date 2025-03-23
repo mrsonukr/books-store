@@ -2,94 +2,33 @@ import { Theme } from "@radix-ui/themes";
 import React, { useState, useEffect, useRef } from "react";
 import { Table, Button, AlertDialog, Flex } from "@radix-ui/themes";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import Notification from "../components/Notifiaction/Notification"; // Import the Notification component
-
-// Hardcoded book data from SQL dump
-const staticBooks = [
-  {
-    book_id: 2,
-    book_name: "Mystery of the Lost Island",
-    author_name: "Jane Smith",
-    category: "Mystery",
-    price: 14.99,
-  },
-  {
-    book_id: 3,
-    book_name: "Learning React",
-    author_name: "Alex Johnson",
-    category: "Technology",
-    price: 29.99,
-  },
-  {
-    book_id: 4,
-    book_name: "Cooking Made Easy",
-    author_name: "Emily Clark",
-    category: "Cooking",
-    price: 9.99,
-  },
-  {
-    book_id: 5,
-    book_name: "Echoes of the Past",
-    author_name: "Michael Brown",
-    category: "Historical Fiction",
-    price: 17.50,
-  },
-  {
-    book_id: 6,
-    book_name: "Quantum Secrets",
-    author_name: "Sarah Lee",
-    category: "Biography",
-    price: 24.99,
-  },
-  {
-    book_id: 7,
-    book_name: "The Silent Forest",
-    author_name: "David Kim",
-    category: "Thriller",
-    price: 12.99,
-  },
-  {
-    book_id: 8,
-    book_name: "Python for Beginners",
-    author_name: "Laura Evans",
-    category: "Technology",
-    price: 22.00,
-  },
-  {
-    book_id: 9,
-    book_name: "Taste of Italy",
-    author_name: "Gina Rossi",
-    category: "Cooking",
-    price: 15.75,
-  },
-  {
-    book_id: 10,
-    book_name: "The Lost Expedition",
-    author_name: "Tom Hardy",
-    category: "Adventure",
-    price: 18.25,
-  },
-  {
-    book_id: 11,
-    book_name: "Shadows of Doubt",
-    author_name: "Emma Watson",
-    category: "Mystery",
-    price: 13.99,
-  },
-  {
-    book_id: 12,
-    book_name: "Beyond the Stars",
-    author_name: "Neil Carter",
-    category: "Science Fiction",
-    price: 26.50,
-  },
-];
 
 const ManageBook = () => {
   const navigate = useNavigate();
-  const [books, setBooks] = useState(staticBooks); // Use static data directly
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [notifications, setNotifications] = useState([]);
   const timeoutRefs = useRef([]);
+
+  // Fetch books from API on component mount
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        const response = await axios.get("http://localhost:5000/api/books");
+        setBooks(response.data.data);
+        setLoading(false);
+      } catch (err) {
+        setError("Failed to fetch books");
+        setLoading(false);
+        addNotification("error", "Failed to fetch books");
+        console.error("Error fetching books:", err);
+      }
+    };
+    fetchBooks();
+  }, []);
 
   // Notification timeout management
   useEffect(() => {
@@ -127,14 +66,20 @@ const ManageBook = () => {
     console.log(`Edit book with ID: ${id}`);
   };
 
-  const handleDelete = (id) => {
-    // Simulate deletion by filtering out the book
-    setBooks((prevBooks) => prevBooks.filter((book) => book.book_id !== id));
-    addNotification("success", "Book deleted successfully");
-    console.log(`Deleted book with ID: ${id}`);
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/books/${id}`);
+      setBooks(books.filter((book) => book.book_id !== id));
+      addNotification("success", "Book deleted successfully");
+      console.log(`Deleted book with ID: ${id}`);
+    } catch (err) {
+      console.error("Error deleting book:", err);
+      addNotification("error", "Failed to delete book");
+    }
   };
 
-  if (books.length === 0) return <div>No books available.</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
 
   return (
     <Theme>
@@ -179,8 +124,7 @@ const ManageBook = () => {
                       <AlertDialog.Content maxWidth="450px">
                         <AlertDialog.Title>Delete Book</AlertDialog.Title>
                         <AlertDialog.Description size="2">
-                          Are you sure? This book will be permanently deleted
-                          and cannot be recovered.
+                          Are you sure? This book will be permanently deleted and cannot be recovered.
                         </AlertDialog.Description>
                         <Flex gap="3" mt="4" justify="end">
                           <AlertDialog.Cancel>
@@ -206,10 +150,7 @@ const ManageBook = () => {
             ))}
           </Table.Body>
         </Table.Root>
-        <Notification
-          notifications={notifications}
-          onClose={removeNotification}
-        />
+        <Notification notifications={notifications} onClose={removeNotification} />
       </div>
     </Theme>
   );

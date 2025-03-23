@@ -5,140 +5,20 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar, faCartPlus } from "@fortawesome/free-solid-svg-icons";
 import Notification from "../Notifiaction/Notification";
 
-// Hardcoded book data from SQL dump
-const staticBooks = [
-  {
-    book_id: 2,
-    book_name: "Mystery of the Lost Island",
-    book_image: "/assets/images/book2.png",
-    price: 14.99,
-    author_name: "Jane Smith",
-    rating: 3.0,
-    summary: "A gripping mystery novel that keeps you guessing till the end.",
-    category: "Mystery",
-    pdf_link: null,
-  },
-  {
-    book_id: 3,
-    book_name: "Learning React",
-    book_image: "/assets/images/book3.png",
-    price: 29.99,
-    author_name: "Alex Johnson",
-    rating: 5.0,
-    summary: "A comprehensive guide to mastering React.js and modern web development.",
-    category: "Technology",
-    pdf_link: null,
-  },
-  {
-    book_id: 4,
-    book_name: "Cooking Made Easy",
-    book_image: "/assets/images/book4.png",
-    price: 9.99,
-    author_name: "Emily Clark",
-    rating: 4.0,
-    summary: "Simple and delicious recipes for everyday cooking.",
-    category: "Cooking",
-    pdf_link: null,
-  },
-  {
-    book_id: 5,
-    book_name: "Echoes of the Past",
-    book_image: "/assets/images/book5.png",
-    price: 17.50,
-    author_name: "Michael Brown",
-    rating: 5.0,
-    summary: "A historical tale unraveling secrets buried in time.",
-    category: "Historical Fiction",
-    pdf_link: null,
-  },
-  {
-    book_id: 6,
-    book_name: "Quantum Secrets",
-    book_image: "/assets/images/book6.png",
-    price: 24.99,
-    author_name: "Sarah Lee",
-    rating: null,
-    summary: "A sci-fi thriller exploring the mysteries of quantum physics.",
-    category: "Biography",
-    pdf_link: "jshjhj",
-  },
-  {
-    book_id: 7,
-    book_name: "The Silent Forest",
-    book_image: "/assets/images/book7.png",
-    price: 12.99,
-    author_name: "David Kim",
-    rating: 3.0,
-    summary: "A chilling suspense story set in a haunted woodland.",
-    category: "Thriller",
-    pdf_link: null,
-  },
-  {
-    book_id: 8,
-    book_name: "Python for Beginners",
-    book_image: "/assets/images/book8.png",
-    price: 22.00,
-    author_name: "Laura Evans",
-    rating: 5.0,
-    summary: "A beginner-friendly guide to mastering Python programming.",
-    category: "Technology",
-    pdf_link: null,
-  },
-  {
-    book_id: 9,
-    book_name: "Taste of Italy",
-    book_image: "/assets/images/book9.png",
-    price: 15.75,
-    author_name: "Gina Rossi",
-    rating: 4.0,
-    summary: "Authentic Italian recipes to bring the flavors of Italy home.",
-    category: "Cooking",
-    pdf_link: null,
-  },
-  {
-    book_id: 10,
-    book_name: "The Lost Expedition",
-    book_image: "/assets/images/book10.png",
-    price: 18.25,
-    author_name: "Tom Hardy",
-    rating: 4.0,
-    summary: "An adventurer’s perilous quest in the Amazon jungle.",
-    category: "Adventure",
-    pdf_link: null,
-  },
-  {
-    book_id: 11,
-    book_name: "Shadows of Doubt",
-    book_image: "/assets/images/book11.png",
-    price: 13.99,
-    author_name: "Emma Watson",
-    rating: 3.0,
-    summary: "A detective novel filled with twists and unexpected turns.",
-    category: "Mystery",
-    pdf_link: null,
-  },
-  {
-    book_id: 12,
-    book_name: "Beyond the Stars",
-    book_image: "/assets/images/book12.png",
-    price: 26.50,
-    author_name: "Neil Carter",
-    rating: 5.0,
-    summary: "A futuristic saga of humanity’s journey across the galaxy.",
-    category: "Science Fiction",
-    pdf_link: null,
-  },
-];
+// Simple in-memory cache to persist fetched books
+let cachedBooks = null;
 
 const FeatCard = ({ title = "Best Seller Books" }) => {
   const scrollContainerRef = useRef(null);
   const sectionRef = useRef(null);
   const [showLeftOverlay, setShowLeftOverlay] = useState(false);
   const [showRightOverlay, setShowRightOverlay] = useState(false);
-  const [books] = useState(staticBooks); // Use static data directly
+  const [books, setBooks] = useState(cachedBooks || []);
+  const [loading, setLoading] = useState(!cachedBooks); // Only load if no cache
+  const [showSkeleton, setShowSkeleton] = useState(!cachedBooks); // Only show skeleton if no cache
+  const [error, setError] = useState(null);
   const [notifications, setNotifications] = useState([]);
-  const [showSkeleton, setShowSkeleton] = useState(true); // Show skeleton initially
-  const [isHistoryNavigation, setIsHistoryNavigation] = useState(false);
+  const [isHistoryNavigation, setIsHistoryNavigation] = useState(false); // Track back/forward navigation
 
   const updateOverlays = useCallback(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -152,25 +32,61 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
   // Detect navigation via back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
-      setIsHistoryNavigation(true);
+      setIsHistoryNavigation(true); // Set flag when navigating via history
     };
 
     window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   }, []);
 
-  // Intersection Observer for skeleton transition
+  // Fetch books only if not cached
+  useEffect(() => {
+    const fetchBooks = async () => {
+      if (cachedBooks) {
+        setBooks(cachedBooks);
+        setLoading(false);
+        setShowSkeleton(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:5000/api/books");
+        const result = await response.json();
+        if (result.status === "success") {
+          const shuffledBooks = result.data.sort(() => Math.random() - 0.5);
+          setBooks(shuffledBooks);
+          cachedBooks = shuffledBooks; // Cache the books
+          setLoading(false);
+        } else {
+          setError("Failed to fetch books");
+          addNotification("error", "Failed to fetch books");
+        }
+      } catch (err) {
+        setError("Error fetching books: " + err.message);
+        addNotification("error", "Error fetching books: " + err.message);
+      }
+    };
+
+    fetchBooks();
+  }, []);
+
+  // Intersection Observer to handle visibility and skeleton transition
   useEffect(() => {
     const currentSection = sectionRef.current;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          if (!isHistoryNavigation) {
+        if (entry.isIntersecting && !loading) {
+          if (!cachedBooks || !isHistoryNavigation) {
+            // Show skeleton with animation on initial load
             setTimeout(() => {
               setShowSkeleton(false);
               setTimeout(updateOverlays, 100);
             }, 1000);
           } else {
+            // Skip animation on history navigation or cached data
             setShowSkeleton(false);
             updateOverlays();
           }
@@ -179,21 +95,27 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
       { threshold: 0.1 }
     );
 
-    if (currentSection) observer.observe(currentSection);
+    if (currentSection) {
+      observer.observe(currentSection);
+    }
+
     return () => {
-      if (currentSection) observer.unobserve(currentSection);
+      if (currentSection) {
+        observer.unobserve(currentSection);
+      }
     };
-  }, [updateOverlays, isHistoryNavigation]);
+  }, [loading, updateOverlays, isHistoryNavigation]);
 
   // Scroll event listener for overlays
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       scrollContainer.addEventListener("scroll", updateOverlays);
-      if (!showSkeleton) updateOverlays();
-      return () => scrollContainer.removeEventListener("scroll", updateOverlays);
+      if (!loading && !showSkeleton) updateOverlays();
+      return () =>
+        scrollContainer.removeEventListener("scroll", updateOverlays);
     }
-  }, [updateOverlays, showSkeleton]);
+  }, [updateOverlays, loading, showSkeleton]);
 
   // Notification timeout cleanup
   useEffect(() => {
@@ -204,7 +126,11 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
   }, [notifications]);
 
   const addNotification = (type, message) => {
-    const newNotification = { id: Date.now(), type, message };
+    const newNotification = {
+      id: Date.now(),
+      type,
+      message,
+    };
     setNotifications((prev) => [...prev, newNotification]);
   };
 
@@ -230,6 +156,8 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
       addNotification("info", `${book.book_name} is already in your cart!`);
     }
   };
+
+  const displayedBooks = books.slice(0, 10);
 
   const scrollToItem = (index) => {
     const cardWidth = 200;
@@ -259,19 +187,21 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
     </div>
   );
 
-  if (books.length === 0 && !showSkeleton) return <p>No books available.</p>;
+  if (error) return <p>{error}</p>;
+  if (displayedBooks.length === 0 && !loading && !showSkeleton)
+    return <p>No books available.</p>;
 
   return (
     <>
       <Notification notifications={notifications} onClose={removeNotification} />
       <section className="Fead-card" ref={sectionRef}>
         <h1 className="heading">{title}</h1>
-        {showSkeleton && !isHistoryNavigation ? (
+        {showSkeleton && !isHistoryNavigation ? ( // Only show skeleton on initial load
           <SkeletonLoader />
         ) : (
           <div className="scroll-container">
             <div className="book-scroll" ref={scrollContainerRef}>
-              {books.map((book) => (
+              {displayedBooks.map((book) => (
                 <div className="book-card" key={book.book_id}>
                   <div className="book-img">
                     <img src={book.book_image} alt={book.book_name} />
@@ -324,9 +254,9 @@ const FeatCard = ({ title = "Best Seller Books" }) => {
             ></div>
           </div>
         )}
-        {!showSkeleton && (
+        {!showSkeleton && !loading && (
           <div className="dots">
-            {books.map((_, index) => (
+            {displayedBooks.map((_, index) => (
               <button
                 key={index}
                 className="dot"
